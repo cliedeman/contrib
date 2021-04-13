@@ -1,0 +1,38 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{ define "globalsearch" }}
+{{ template "header" $ }}
+
+// TODO: clear global filters
+
+{{ end }}
+
+{{ define "dialect/sql/query/fields" }}
+	// entglobalsearch predicate
+	globalPredicate predicate.{{ $.Name }}
+{{ end }}
+
+{{ define "dialect/sql/query/spec/globalsearch" }}
+	// Combine into and statement
+	{{- $builder := pascal $.Scope.Builder }}
+	{{- $receiver := receiver $builder }}
+	if {{ $receiver }}.globalPredicate != nil {
+		originalPredicates := _spec.Predicate
+		_spec.Predicate = func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
+			if originalPredicates != nil {
+			    originalPredicates(s1)
+			}
+			{{ $receiver }}.globalPredicate(s1)
+			s.Where(s1.P())
+		}
+	}
+{{ end }}
+
+{{ define "client/query/init" }}
+	globalPredicate: user.Active(true),
+{{ end }}
