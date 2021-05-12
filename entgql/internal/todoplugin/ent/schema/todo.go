@@ -73,6 +73,9 @@ func (Todo) Edges() []ent.Edge {
 // Annotations returns todo annotations.
 func (Todo) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entgql.RelayConnection(),
+		entgql.Annotation{
+			RelayConnection: true,
+			GenType:         true,
+		},
 	}
 }

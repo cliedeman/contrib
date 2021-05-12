@@ -19,14 +19,22 @@ import "entgo.io/ent/schema"
 // Annotation annotates fields and edges with metadata for templates.
 type Annotation struct {
 	// OrderField is the ordering field as defined in graphql schema.
-	OrderField string
+	OrderField string `json:"OrderField,omitempty"`
 	// Bind implies the edge field name in graphql schema
 	// is equivalent to the name used in ent schema.
-	Bind bool
+	Bind bool `json:"Bind,omitempty"`
 	// Mapping is the edge field names as defined in graphql schema.
-	Mapping []string
+	Mapping []string `json:"Mapping,omitempty"`
 	// RelayConnection expose this node as a relay connection
-	RelayConnection bool
+	RelayConnection bool `json:"RelayConnection,omitempty"`
+	// GenType generate the graphql type
+	GenType bool `json:"GenType,omitempty"`
+	// GqlName provide alternative name. see: https://gqlgen.com/config/#inline-config-with-directives
+	GqlName string `json:"GqlName,omitempty"`
+	// GqlType override type
+	GqlType string `json:"GqlType,omitempty"`
+	// GqlScalarMappings defines custom scalars mappings, scalars will also be created automatically
+	GqlScalarMappings map[string]string `json:"GqlScalarMappings,omitempty"`
 }
 
 // Name implements ent.Annotation interface.
@@ -47,11 +55,6 @@ func Bind() Annotation {
 // MapsTo returns a mapping annotation.
 func MapsTo(names ...string) Annotation {
 	return Annotation{Mapping: names}
-}
-
-// RelayConnection returns a connection annotation.
-func RelayConnection() Annotation {
-	return Annotation{RelayConnection: true}
 }
 
 // Merge implements the schema.Merger interface.
@@ -78,6 +81,15 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if ant.RelayConnection {
 		a.RelayConnection = true
+	}
+	if ant.GenType {
+		a.GenType = true
+	}
+	if ant.GqlName != "" {
+		a.GqlName = ant.GqlName
+	}
+	if ant.GqlType != "" {
+		a.GqlType = ant.GqlType
 	}
 	return a
 }

@@ -12,45 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package entgql
+package plugin
 
 import (
+	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
+	"fmt"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func TestGetConnections_empty(t *testing.T) {
-	connections := getConnections(&gen.Graph{
-		Nodes: []*gen.Type{},
+func TestEmpty(t *testing.T) {
+	e := New(&gen.Graph{
+		Config: &gen.Config{},
 	})
-	require.Equal(t, connections, []string(nil))
-}
-
-func TestGetConnections(t *testing.T) {
-	connections := getConnections(&gen.Graph{
-		Nodes: []*gen.Type{
-			{
-				Name: "User",
-				Annotations: map[string]interface{}{
-					"EntGQL": map[string]interface{}{
-						"RelayConnection": true,
-					},
-				},
-			},
-			{
-				Name: "Todo",
-				Annotations: map[string]interface{}{
-					"EntGQL": map[string]interface{}{},
-				},
-			},
-			{
-				Name: "User_Todo",
-			},
-		},
-	})
-	require.Equal(t, connections, []string{"User"})
+	require.Equal(t, e.print(), ``)
 }
 
 func TestModifyConfig(t *testing.T) {
@@ -101,3 +78,91 @@ func TestModifyConfig_noderPresent(t *testing.T) {
 	}
 	require.Equal(t, cfg, expected)
 }
+
+func TestGetTypes(t *testing.T) {
+	t1 := &gen.Type{
+		Name: "T1",
+		Annotations: map[string]interface{}{
+			annotationName: map[string]interface{}{
+				"GenType": true,
+			},
+		},
+	}
+	t2 := &gen.Type{
+		Name: "T1",
+	}
+	require.Equal(t, []*gen.Type{t1}, getTypes(&gen.Graph{
+		Nodes: []*gen.Type{t1, t2},
+	}))
+}
+
+func TestInjectSourceEarlyEmpty(t *testing.T) {
+	e := New(&gen.Graph{
+		Config: &gen.Config{},
+	})
+	s := e.InjectSourceEarly()
+	require.False(t, s.BuiltIn)
+	require.Equal(t, s.Input, `scalar Cursor
+interface Node {
+	id: ID!
+}
+type PageInfo {
+	hasNextPage: Boolean!
+	hasPreviousPage: Boolean!
+	startCursor: Cursor
+	endCursor: Cursor
+}
+`)
+}
+
+func TestInjectSourceEarly(t *testing.T) {
+	graph, err := entc.LoadGraph("../internal/todoplugin/ent/schema", &gen.Config{})
+	require.NoError(t, err)
+	plugin := New(graph)
+	s := plugin.InjectSourceEarly()
+	fmt.Println(s.Input)
+	require.Equal(t, s.Input, expected)
+}
+
+var expected = `scalar Cursor
+interface Node {
+	id: ID!
+}
+type PageInfo {
+	hasNextPage: Boolean!
+	hasPreviousPage: Boolean!
+	startCursor: Cursor
+	endCursor: Cursor
+}
+enum Role {
+	ADMIN
+	USER
+	UNKNOWN
+}
+enum Status {
+	IN_PROGRESS
+	COMPLETED
+}
+type Todo implements Node {
+	id: ID!
+	createdAt: Invalid!
+	status: Status!
+	priority: Int!
+	text: String!
+}
+type TodoConnection {
+	edges: [TodoEdge]
+	pageInfo: PageInfo!
+	totalCount: Int!
+}
+type TodoEdge {
+	node: Todo
+	cursor: Cursor
+}
+type User implements Node {
+	id: ID!
+	username: String!
+	age: Float!
+	role: Role!
+}
+`

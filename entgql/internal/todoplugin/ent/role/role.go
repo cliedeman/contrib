@@ -12,22 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package entgql
+package role
 
-import (
-	"github.com/stretchr/testify/require"
-	"testing"
+import "io"
+
+type Role string
+
+const (
+	Admin   Role = "ADMIN"
+	User    Role = "USER"
+	Unknown Role = "UNKNOWN"
 )
 
-func TestGenerateConnectionType(t *testing.T) {
-	require.Equal(t, generateConnectionType("User"), `type UserConnection {
-    totalCount: Int!
-    pageInfo: PageInfo!
-    edges: [UserEdge]
+func (Role) Values() (roles []string) {
+	for _, r := range []Role{Admin, User, Unknown} {
+		roles = append(roles, string(r))
+	}
+	return
 }
 
-type UserEdge {
-    node: User
-    cursor: Cursor!
-}`)
+func (r Role) MarshalGQL(w io.Writer) {
+	panic("implement me")
+}
+
+func (r Role) UnmarshalGQL(v interface{}) error {
+	panic("implement me")
 }

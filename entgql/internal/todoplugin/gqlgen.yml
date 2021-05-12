@@ -17,3 +17,6 @@ models:
   Status:
     model:
       - entgo.io/contrib/entgql/internal/todoplugin/ent/todo.Status
+  Role:
+    model:
+      - entgo.io/contrib/entgql/internal/todoplugin/ent/role.Role

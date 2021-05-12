@@ -1,16 +1,4 @@
-enum Status {
-  IN_PROGRESS
-  COMPLETED
-}
-
-scalar Time
-
-type Todo implements Node {
-  id: ID!
-  createdAt: Time
-  status: Status!
-  priority: Int!
-  text: String!
+extend type Todo {
   parent: Todo
   children: [Todo!]
 }

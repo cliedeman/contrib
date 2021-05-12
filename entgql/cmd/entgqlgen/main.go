@@ -16,6 +16,7 @@ package main
 
 import (
 	"entgo.io/contrib/entgql"
+	"entgo.io/contrib/entgql/plugin"
 	"flag"
 	"fmt"
 	"log"
@@ -44,7 +45,14 @@ func main() {
 		fmt.Fprintln(os.Stderr, "failed to load config", err.Error())
 		os.Exit(2)
 	}
-	err = entgql.Generate(cfg, graph)
+	// TODO: remove
+	ann := entgql.Annotation{GqlScalarMappings: map[string]string{
+		"Time": "Time",
+	}}
+	graph.Annotations = gen.Annotations{
+		ann.Name(): ann,
+	}
+	err = plugin.Generate(cfg, graph)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(3)

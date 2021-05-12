@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"entgo.io/contrib/entgql/internal/todoplugin/ent/todo"
+	"entgo.io/contrib/entgql/internal/todoplugin/ent/user"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -46,6 +47,7 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		todo.Table: todo.ValidColumn,
+		user.Table: user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
