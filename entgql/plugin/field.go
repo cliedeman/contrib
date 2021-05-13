@@ -17,27 +17,36 @@ package plugin
 import (
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema/field"
+	"fmt"
 	"github.com/vektah/gqlparser/v2/ast"
 	"strings"
 )
 
-func (e *entgqlgen) typeFields(t *gen.Type) ast.FieldList {
+func (e *entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
 	var fields ast.FieldList
 	if t.ID != nil {
+		ft, err := e.fieldType(t.ID, true)
+		if err != nil {
+			return nil, err
+		}
 		fields = append(fields, &ast.FieldDefinition{
 			Name:       camel(t.ID.Name),
-			Type:       e.fieldType(t.ID, true),
+			Type:       ft,
 			Directives: e.fieldDirectives(t.ID),
 		})
 	}
 	for _, f := range t.Fields {
+		ft, err := e.fieldType(f, false)
+		if err != nil {
+			return nil, err
+		}
 		fields = append(fields, &ast.FieldDefinition{
 			Name:       camel(f.Name),
-			Type:       e.fieldType(f, false),
+			Type:       ft,
 			Directives: e.fieldDirectives(f),
 		})
 	}
-	return fields
+	return fields, nil
 }
 
 func (e *entgqlgen) fieldDirectives(*gen.Field) ast.DirectiveList {
@@ -52,11 +61,11 @@ func namedType(name string, nillable bool) *ast.Type {
 	return ast.NamedType(name, nil)
 }
 
-func (e *entgqlgen) fieldType(f *gen.Field, idField bool) *ast.Type {
+func (e *entgqlgen) fieldType(f *gen.Field, idField bool) (*ast.Type, error) {
 	// TODO: handle array
 	userDefinedType := e.fieldUserDefinedType(f)
 	if userDefinedType != nil {
-		return userDefinedType
+		return userDefinedType, nil
 	}
 	nillable := f.Nillable
 	typ := f.Type.Type
@@ -64,28 +73,27 @@ func (e *entgqlgen) fieldType(f *gen.Field, idField bool) *ast.Type {
 
 	switch {
 	case e.scalarMappings[typeName] != "":
-		return namedType(e.scalarMappings[typeName], nillable)
+		return namedType(e.scalarMappings[typeName], nillable), nil
 	case idField:
 		// Id cannot be null for node interface
-		return namedType("ID", false)
+		return namedType("ID", false), nil
 	case f.IsEnum():
 		// Guess enum type
-		return namedType(strings.Title(f.Name), nillable)
+		return namedType(strings.Title(f.Name), nillable), nil
 	case typ.Float():
-		return namedType("Float", nillable)
+		return namedType("Float", nillable), nil
 	case typ.Integer():
-		return namedType("Int", nillable)
+		return namedType("Int", nillable), nil
 	case typ == field.TypeString:
-		return namedType("String", nillable)
+		return namedType("String", nillable), nil
 	case typ == field.TypeBool:
-		return namedType("Boolean", nillable)
+		return namedType("Boolean", nillable), nil
 	case typ == field.TypeBytes:
-		return namedType("TODOBytes", nillable)
+		return nil, fmt.Errorf("bytes type not implemented")
 	case typ == field.TypeJSON:
-		return namedType("TODOJSON", nillable)
+		return nil, fmt.Errorf("json type not implemented")
 	default:
-		// TODO: error
-		return namedType("Invalid", nillable)
+		return nil, fmt.Errorf("unexpected type: %s", typ.String())
 	}
 }
 

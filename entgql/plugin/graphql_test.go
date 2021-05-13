@@ -154,7 +154,8 @@ func TestTypes(t *testing.T) {
 			},
 		},
 	}, nil)
-	e.types()
+	err := e.types()
+	require.NoError(t, err)
 	require.Equal(t, e.print(), `type Group implements Node & SomeInterface {
 	name: String!
 }

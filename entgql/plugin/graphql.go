@@ -119,7 +119,7 @@ func unorderedEqual(first, second []string) bool {
 	return true
 }
 
-func (e *entgqlgen) types() {
+func (e *entgqlgen) types() error {
 	for _, t := range e.genTypes {
 		// TODO: make relay config opt in
 		interfaces := []string{"Node"}
@@ -127,16 +127,21 @@ func (e *entgqlgen) types() {
 		if ann != nil {
 			interfaces = append(interfaces, ann.GqlImplements...)
 		}
+		fields, err := e.typeFields(t)
+		if err != nil {
+			return err
+		}
 		e.insertDefinition(&ast.Definition{
 			Name:       t.Name,
 			Kind:       ast.Object,
-			Fields:     e.typeFields(t),
+			Fields:     fields,
 			Interfaces: interfaces,
 		})
 		if createRelayConnection(t) {
 			e.relayConnection(t)
 		}
 	}
+	return nil
 }
 
 func (e *entgqlgen) insertDefinitions(defs []*ast.Definition) {

@@ -47,7 +47,10 @@ func (e *entgqlgen) InjectSourceEarly() *ast.Source {
 	e.scalars()
 	e.relayBuiltins()
 	e.enums()
-	e.types()
+	err := e.types()
+	if err != nil {
+		panic(err)
+	}
 	for _, h := range e.hooks {
 		h(e.schema)
 	}

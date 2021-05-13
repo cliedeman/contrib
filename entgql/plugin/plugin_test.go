@@ -15,6 +15,7 @@
 package plugin
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -115,7 +116,14 @@ type PageInfo {
 }
 
 func TestInjectSourceEarly(t *testing.T) {
-	graph, err := entc.LoadGraph("../internal/todoplugin/ent/schema", &gen.Config{})
+	ann := entgql.Annotation{GqlScalarMappings: map[string]string{
+		"Time": "Time",
+	}}
+	graph, err := entc.LoadGraph("../internal/todoplugin/ent/schema", &gen.Config{
+		Annotations: map[string]interface{}{
+			ann.Name(): ann,
+		},
+	})
 	require.NoError(t, err)
 	plugin := New(graph, nil)
 	s := plugin.InjectSourceEarly()
@@ -141,9 +149,10 @@ enum Status {
 	IN_PROGRESS
 	COMPLETED
 }
+scalar Time
 type Todo implements Node {
 	id: ID!
-	createdAt: Invalid!
+	createdAt: Time!
 	status: Status!
 	priority: Int!
 	text: String!

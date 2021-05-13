@@ -28,7 +28,7 @@ func TestTypeFields(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
 	}, nil)
-	fields := e.typeFields(&gen.Type{
+	fields, err := e.typeFields(&gen.Type{
 		ID: &gen.Field{
 			Name: "Id",
 			Type: &field.TypeInfo{
@@ -44,6 +44,7 @@ func TestTypeFields(t *testing.T) {
 			},
 		},
 	})
+	require.NoError(t, err)
 	require.Equal(t, fields, ast.FieldList{
 		{
 			Name: "id",
@@ -88,7 +89,7 @@ func TestFields(t *testing.T) {
 	}, nil)
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%s(%s)", tc.name, tc.fieldType.ConstName()), func(t *testing.T) {
-			f := e.fieldType(&gen.Field{
+			f, err := e.fieldType(&gen.Field{
 				Name: tc.name,
 				Type: &field.TypeInfo{
 					Type: tc.fieldType,
@@ -100,8 +101,9 @@ func TestFields(t *testing.T) {
 					},
 				},
 			}, false)
+			require.NoError(t, err)
 			require.Equal(t, f.String(), tc.expected)
-			f = e.fieldType(&gen.Field{
+			f, err = e.fieldType(&gen.Field{
 				Name: tc.name,
 				Type: &field.TypeInfo{
 					Type: tc.fieldType,
@@ -113,6 +115,7 @@ func TestFields(t *testing.T) {
 					},
 				},
 			}, false)
+			require.NoError(t, err)
 			require.Equal(t, f.String(), tc.expected+"!")
 		})
 	}
@@ -122,11 +125,12 @@ func TestIdField(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
 	}, nil)
-	f := e.fieldType(&gen.Field{
+	f, err := e.fieldType(&gen.Field{
 		Name: "id",
 		Type: &field.TypeInfo{
 			Type: field.TypeInt,
 		},
 	}, true)
+	require.NoError(t, err)
 	require.Equal(t, f.String(), "ID!")
 }
