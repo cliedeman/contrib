@@ -17,7 +17,6 @@ package plugin
 import (
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
-	"fmt"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -120,7 +119,6 @@ func TestInjectSourceEarly(t *testing.T) {
 	require.NoError(t, err)
 	plugin := New(graph)
 	s := plugin.InjectSourceEarly()
-	fmt.Println(s.Input)
 	require.Equal(t, s.Input, expected)
 }
 
@@ -163,6 +161,7 @@ type User implements Node {
 	id: ID!
 	username: String!
 	age: Float!
+	amount: Float!
 	role: Role!
 }
 `
