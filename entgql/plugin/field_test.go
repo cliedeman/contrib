@@ -27,7 +27,7 @@ import (
 func TestTypeFields(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
-	})
+	}, nil)
 	fields := e.typeFields(&gen.Type{
 		ID: &gen.Field{
 			Name: "Id",
@@ -85,7 +85,7 @@ func TestFields(t *testing.T) {
 					}},
 			},
 		},
-	})
+	}, nil)
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%s(%s)", tc.name, tc.fieldType.ConstName()), func(t *testing.T) {
 			f := e.fieldType(&gen.Field{
@@ -121,7 +121,7 @@ func TestFields(t *testing.T) {
 func TestIdField(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
-	})
+	}, nil)
 	f := e.fieldType(&gen.Field{
 		Name: "id",
 		Type: &field.TypeInfo{

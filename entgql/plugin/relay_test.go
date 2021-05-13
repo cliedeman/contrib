@@ -23,7 +23,7 @@ import (
 func TestRelayBuiltins(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
-	})
+	}, nil)
 	e.relayBuiltins()
 	require.Equal(t, e.print(), `scalar Cursor
 interface Node {
@@ -52,7 +52,7 @@ func TestCreateRelayConnection(t *testing.T) {
 func TestRelayConnection(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
-	})
+	}, nil)
 	e.relayConnection(&gen.Type{
 		Name: "Todo",
 	})

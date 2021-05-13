@@ -25,7 +25,7 @@ import (
 func TestEmpty(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
-	})
+	}, nil)
 	require.Equal(t, e.print(), ``)
 }
 
@@ -98,7 +98,7 @@ func TestGetTypes(t *testing.T) {
 func TestInjectSourceEarlyEmpty(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
-	})
+	}, nil)
 	s := e.InjectSourceEarly()
 	require.False(t, s.BuiltIn)
 	require.Equal(t, s.Input, `scalar Cursor
@@ -117,7 +117,7 @@ type PageInfo {
 func TestInjectSourceEarly(t *testing.T) {
 	graph, err := entc.LoadGraph("../internal/todoplugin/ent/schema", &gen.Config{})
 	require.NoError(t, err)
-	plugin := New(graph)
+	plugin := New(graph, nil)
 	s := plugin.InjectSourceEarly()
 	require.Equal(t, s.Input, expected)
 }

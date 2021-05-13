@@ -63,7 +63,7 @@ func TestEnums(t *testing.T) {
 func TestBuiltins(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
-	})
+	}, nil)
 	e.builtIns()
 	require.Equal(t, e.print(), ``)
 }
@@ -71,7 +71,7 @@ func TestBuiltins(t *testing.T) {
 func TestScalars(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
-	})
+	}, nil)
 	e.scalars()
 	require.Equal(t, e.print(), ``)
 	e = New(&gen.Graph{
@@ -84,7 +84,7 @@ func TestScalars(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, nil)
 	e.scalars()
 	require.Equal(t, e.print(), `scalar Time
 `)
@@ -103,7 +103,7 @@ func TestScalars(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, nil)
 	e.scalars()
 	require.Equal(t, e.print(), `scalar Time
 `)
@@ -153,7 +153,7 @@ func TestTypes(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, nil)
 	e.types()
 	require.Equal(t, e.print(), `type Group implements Node & SomeInterface {
 	name: String!

@@ -36,7 +36,11 @@ type entgqlgen struct {
 	genTypes       []*gen.Type
 	scalarMappings map[string]string
 	schema         *ast.Schema
+	hooks          []SchemaHook
 }
+
+// SchemaHook hook to modify schema before printing
+type SchemaHook func(schema *ast.Schema)
 
 func (e *entgqlgen) InjectSourceEarly() *ast.Source {
 	e.builtIns()
@@ -44,6 +48,9 @@ func (e *entgqlgen) InjectSourceEarly() *ast.Source {
 	e.relayBuiltins()
 	e.enums()
 	e.types()
+	for _, h := range e.hooks {
+		h(e.schema)
+	}
 	return &ast.Source{
 		Name:    "entgqlgen.graphql",
 		Input:   e.print(),
@@ -71,7 +78,7 @@ func getTypes(graph *gen.Graph) []*gen.Type {
 	return types
 }
 
-func New(graph *gen.Graph) *entgqlgen {
+func New(graph *gen.Graph, hooks []SchemaHook) *entgqlgen {
 	types := getTypes(graph)
 	var scalarMappings map[string]string
 	if graph.Annotations != nil {
@@ -86,6 +93,7 @@ func New(graph *gen.Graph) *entgqlgen {
 	return &entgqlgen{
 		genTypes:       types,
 		scalarMappings: scalarMappings,
+		hooks:          hooks,
 		schema: &ast.Schema{
 			Types:         map[string]*ast.Definition{},
 			Directives:    map[string]*ast.DirectiveDefinition{},
@@ -99,10 +107,10 @@ func (e *entgqlgen) Name() string {
 	return "entgqlgen"
 }
 
-func Generate(cfg *config.Config, graph *gen.Graph) error {
+func Generate(cfg *config.Config, graph *gen.Graph, hooks ...SchemaHook) error {
 	modifyConfig(cfg, graph)
 	return api.Generate(cfg,
-		api.AddPlugin(New(graph)),
+		api.AddPlugin(New(graph, hooks)),
 	)
 }
 
