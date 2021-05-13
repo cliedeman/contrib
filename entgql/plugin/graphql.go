@@ -121,12 +121,17 @@ func unorderedEqual(first, second []string) bool {
 
 func (e *entgqlgen) types() {
 	for _, t := range e.genTypes {
+		// TODO: make relay config opt in
+		interfaces := []string{"Node"}
+		ann := entgqlAnnotate(t.Annotations)
+		if ann != nil {
+			interfaces = append(interfaces, ann.GqlImplements...)
+		}
 		e.insertDefinition(&ast.Definition{
-			Name:   t.Name,
-			Kind:   ast.Object,
-			Fields: e.typeFields(t),
-			// TODO: make relay config opt in
-			Interfaces: []string{"Node"},
+			Name:       t.Name,
+			Kind:       ast.Object,
+			Fields:     e.typeFields(t),
+			Interfaces: interfaces,
 		})
 		if createRelayConnection(t) {
 			e.relayConnection(t)

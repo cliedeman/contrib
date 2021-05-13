@@ -33,6 +33,8 @@ type Annotation struct {
 	GqlName string `json:"GqlName,omitempty"`
 	// GqlType override type
 	GqlType string `json:"GqlType,omitempty"`
+	// GqlImplements extra interfaces that are implemented
+	GqlImplements []string `json:"GqlImplements,omitempty"`
 	// GqlScalarMappings defines custom scalars mappings, scalars will also be created automatically
 	GqlScalarMappings map[string]string `json:"GqlScalarMappings,omitempty"`
 }

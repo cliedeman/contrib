@@ -148,13 +148,14 @@ func TestTypes(t *testing.T) {
 					annotationName: map[string]interface{}{
 						"GenType":         true,
 						"RelayConnection": true,
+						"GqlImplements":   []string{"SomeInterface"},
 					},
 				},
 			},
 		},
 	})
 	e.types()
-	require.Equal(t, e.print(), `type Group implements Node {
+	require.Equal(t, e.print(), `type Group implements Node & SomeInterface {
 	name: String!
 }
 type GroupConnection {
