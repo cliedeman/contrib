@@ -24,6 +24,24 @@ import (
 	"testing"
 )
 
+func TestIncludeField(t *testing.T) {
+	require.True(t, includeField(&gen.Field{}))
+	require.False(t, includeField(&gen.Field{
+		Annotations: map[string]interface{}{
+			annotationName: map[string]interface{}{
+				"Skip": true,
+			},
+		},
+	}))
+	require.True(t, includeField(&gen.Field{
+		Annotations: map[string]interface{}{
+			annotationName: map[string]interface{}{
+				"Skip": false,
+			},
+		},
+	}))
+}
+
 func TestTypeFields(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},

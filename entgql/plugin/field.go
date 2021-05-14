@@ -15,6 +15,7 @@
 package plugin
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema/field"
 	"fmt"
@@ -22,12 +23,20 @@ import (
 	"strings"
 )
 
+func includeField(f *gen.Field) bool {
+	ann := entgql.EntgqlAnnotate(f.Annotations)
+	if ann != nil && ann.Skip {
+		return false
+	}
+	return true
+}
+
 func (e *entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
 	var fields ast.FieldList
-	if t.ID != nil {
+	if t.ID != nil && includeField(t.ID) {
 		ft, err := e.fieldType(t.ID, true)
 		if err != nil {
-			return nil, fmt.Errorf("field(%s): %v", t.ID.Name, err)
+			return nil, fmt.Errorf("field(%s): %w", t.ID.Name, err)
 		}
 		fields = append(fields, &ast.FieldDefinition{
 			Name:       camel(t.ID.Name),
@@ -36,9 +45,12 @@ func (e *entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
 		})
 	}
 	for _, f := range t.Fields {
+		if !includeField(f) {
+			continue
+		}
 		ft, err := e.fieldType(f, false)
 		if err != nil {
-			return nil, fmt.Errorf("field(%s): %v", t.ID.Name, err)
+			return nil, fmt.Errorf("field(%s): %w", t.ID.Name, err)
 		}
 		fields = append(fields, &ast.FieldDefinition{
 			Name:       camel(f.Name),
@@ -100,7 +112,7 @@ func (e *entgqlgen) fieldType(f *gen.Field, idField bool) (*ast.Type, error) {
 }
 
 func (e *entgqlgen) fieldUserDefinedType(f *gen.Field) *ast.Type {
-	ann := entgqlAnnotate(f.Annotations)
+	ann := entgql.EntgqlAnnotate(f.Annotations)
 	if ann != nil && ann.GqlType != "" {
 		return namedType(ann.GqlType, f.Nillable)
 	}

@@ -15,7 +15,6 @@
 package plugin
 
 import (
-	"encoding/json"
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc/gen"
 	"fmt"
@@ -71,7 +70,7 @@ func (e *entgqlgen) print() string {
 func getTypes(graph *gen.Graph) []*gen.Type {
 	var types []*gen.Type
 	for _, n := range graph.Nodes {
-		ann := entgqlAnnotate(n.Annotations)
+		ann := entgql.EntgqlAnnotate(n.Annotations)
 		if ann != nil {
 			if ann.GenType {
 				types = append(types, n)
@@ -134,17 +133,6 @@ func modifyConfig(cfg *config.Config, graph *gen.Graph) {
 	if !cfg.Models.Exists("Node") {
 		cfg.Models.Add("Node", fmt.Sprintf("%s.Noder", graph.Package))
 	}
-}
-
-func entgqlAnnotate(annotation map[string]interface{}) *entgql.Annotation {
-	annotate := &entgql.Annotation{}
-	if annotation == nil || annotation[annotate.Name()] == nil {
-		return nil
-	}
-	if buf, err := json.Marshal(annotation[annotate.Name()]); err == nil {
-		_ = json.Unmarshal(buf, &annotate)
-	}
-	return annotate
 }
 
 var _ plugin.EarlySourceInjector = &entgqlgen{}

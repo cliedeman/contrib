@@ -15,6 +15,7 @@
 package plugin
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc/gen"
 	"fmt"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -62,7 +63,7 @@ func (e *entgqlgen) relayBuiltins() {
 }
 
 func createRelayConnection(t *gen.Type) bool {
-	ann := entgqlAnnotate(t.Annotations)
+	ann := entgql.EntgqlAnnotate(t.Annotations)
 	if ann != nil {
 		if ann.RelayConnection {
 			return true

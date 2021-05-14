@@ -15,6 +15,7 @@
 package plugin
 
 import (
+	"entgo.io/contrib/entgql"
 	"fmt"
 	"github.com/vektah/gqlparser/v2/ast"
 	"strings"
@@ -124,13 +125,13 @@ func (e *entgqlgen) types() error {
 	for _, t := range e.genTypes {
 		// TODO: make relay config opt in
 		interfaces := []string{"Node"}
-		ann := entgqlAnnotate(t.Annotations)
+		ann := entgql.EntgqlAnnotate(t.Annotations)
 		if ann != nil {
 			interfaces = append(interfaces, ann.GqlImplements...)
 		}
 		fields, err := e.typeFields(t)
 		if err != nil {
-			return fmt.Errorf("type(%s): %v", t.Name, err)
+			return fmt.Errorf("type(%s): %w", t.Name, err)
 		}
 		e.insertDefinition(&ast.Definition{
 			Name:       t.Name,
