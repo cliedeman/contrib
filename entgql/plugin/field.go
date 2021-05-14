@@ -27,7 +27,7 @@ func (e *entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
 	if t.ID != nil {
 		ft, err := e.fieldType(t.ID, true)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("field(%s): %v", t.ID.Name, err)
 		}
 		fields = append(fields, &ast.FieldDefinition{
 			Name:       camel(t.ID.Name),
@@ -38,7 +38,7 @@ func (e *entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
 	for _, f := range t.Fields {
 		ft, err := e.fieldType(f, false)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("field(%s): %v", t.ID.Name, err)
 		}
 		fields = append(fields, &ast.FieldDefinition{
 			Name:       camel(f.Name),
@@ -92,6 +92,8 @@ func (e *entgqlgen) fieldType(f *gen.Field, idField bool) (*ast.Type, error) {
 		return nil, fmt.Errorf("bytes type not implemented")
 	case typ == field.TypeJSON:
 		return nil, fmt.Errorf("json type not implemented")
+	case typ == field.TypeOther:
+		return nil, fmt.Errorf("other type must have typed defined")
 	default:
 		return nil, fmt.Errorf("unexpected type: %s", typ.String())
 	}

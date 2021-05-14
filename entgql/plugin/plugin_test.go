@@ -112,6 +112,7 @@ type PageInfo {
 	startCursor: Cursor
 	endCursor: Cursor
 }
+scalar Time
 `)
 }
 

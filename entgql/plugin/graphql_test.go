@@ -73,20 +73,21 @@ func TestScalars(t *testing.T) {
 		Config: &gen.Config{},
 	}, nil)
 	e.scalars()
-	require.Equal(t, e.print(), ``)
+	require.Equal(t, e.print(), `scalar Time
+`)
 	e = New(&gen.Graph{
 		Config: &gen.Config{
 			Annotations: map[string]interface{}{
 				"EntGQL": entgql.Annotation{
 					GqlScalarMappings: map[string]string{
-						"Time": "Time",
+						"Date": "Date",
 					},
 				},
 			},
 		},
 	}, nil)
 	e.scalars()
-	require.Equal(t, e.print(), `scalar Time
+	require.Equal(t, e.print(), `scalar Date
 `)
 	e = New(&gen.Graph{
 		Config: &gen.Config{

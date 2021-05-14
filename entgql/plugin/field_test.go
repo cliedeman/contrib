@@ -59,23 +59,24 @@ func TestTypeFields(t *testing.T) {
 
 func TestFields(t *testing.T) {
 	testCases := []struct {
-		name        string
-		fieldType   field.Type
-		userDefined string
-		expected    string
+		name         string
+		fieldType    field.Type
+		userDefined  string
+		expectedType string
+		err          error
 	}{
-		{"firstname", field.TypeString, "", "String"},
-		{"age", field.TypeInt, "", "Int"},
-		{"f", field.TypeFloat64, "", "Float"},
-		{"f", field.TypeFloat32, "", "Float"},
-		{"status", field.TypeEnum, "", "Status"},
-		{"status", field.TypeEnum, "StatusEnum", "StatusEnum"},
-		{"status", field.TypeEnum, "StatusEnum", "StatusEnum"},
-		{"timestamp", field.TypeTime, "", "Time"},
-		{"active", field.TypeBool, "", "Boolean"},
-		{"data", field.TypeBytes, "", "TODOBytes"},
-		{"json", field.TypeJSON, "", "TODOJSON"},
-		{"other", field.TypeOther, "", "Invalid"},
+		{"firstname", field.TypeString, "", "String", nil},
+		{"age", field.TypeInt, "", "Int", nil},
+		{"f", field.TypeFloat64, "", "Float", nil},
+		{"f", field.TypeFloat32, "", "Float", nil},
+		{"status", field.TypeEnum, "", "Status", nil},
+		{"status", field.TypeEnum, "StatusEnum", "StatusEnum", nil},
+		{"status", field.TypeEnum, "StatusEnum", "StatusEnum", nil},
+		{"timestamp", field.TypeTime, "", "Time", nil},
+		{"active", field.TypeBool, "", "Boolean", nil},
+		{"data", field.TypeBytes, "", "", fmt.Errorf("bytes type not implemented")},
+		{"json", field.TypeJSON, "", "", fmt.Errorf("json type not implemented")},
+		{"other", field.TypeOther, "", "Invalid", fmt.Errorf("other type must have typed defined")},
 	}
 	e := New(&gen.Graph{
 		Config: &gen.Config{
@@ -101,8 +102,10 @@ func TestFields(t *testing.T) {
 					},
 				},
 			}, false)
-			require.NoError(t, err)
-			require.Equal(t, f.String(), tc.expected)
+			require.Equal(t, err, tc.err)
+			if tc.err == nil {
+				require.Equal(t, f.String(), tc.expectedType)
+			}
 			f, err = e.fieldType(&gen.Field{
 				Name: tc.name,
 				Type: &field.TypeInfo{
@@ -115,8 +118,10 @@ func TestFields(t *testing.T) {
 					},
 				},
 			}, false)
-			require.NoError(t, err)
-			require.Equal(t, f.String(), tc.expected+"!")
+			require.Equal(t, err, tc.err)
+			if tc.err == nil {
+				require.Equal(t, f.String(), tc.expectedType+"!")
+			}
 		})
 	}
 }

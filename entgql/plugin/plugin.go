@@ -83,7 +83,10 @@ func getTypes(graph *gen.Graph) []*gen.Type {
 
 func New(graph *gen.Graph, hooks []SchemaHook) *entgqlgen {
 	types := getTypes(graph)
-	var scalarMappings map[string]string
+	// Include default mapping for time
+	scalarMappings := map[string]string{
+		"Time": "Time",
+	}
 	if graph.Annotations != nil {
 		globalAnn := graph.Annotations[annotationName]
 		// TODO: cleanup assertions
@@ -111,6 +114,7 @@ func (e *entgqlgen) Name() string {
 }
 
 func Generate(cfg *config.Config, graph *gen.Graph, hooks ...SchemaHook) error {
+	// We do not use plugin.MutateConfig because it is called too late in the initialization
 	modifyConfig(cfg, graph)
 	return api.Generate(cfg,
 		api.AddPlugin(New(graph, hooks)),

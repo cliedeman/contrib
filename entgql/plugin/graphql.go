@@ -15,6 +15,7 @@
 package plugin
 
 import (
+	"fmt"
 	"github.com/vektah/gqlparser/v2/ast"
 	"strings"
 )
@@ -129,7 +130,7 @@ func (e *entgqlgen) types() error {
 		}
 		fields, err := e.typeFields(t)
 		if err != nil {
-			return err
+			return fmt.Errorf("type(%s): %v", t.Name, err)
 		}
 		e.insertDefinition(&ast.Definition{
 			Name:       t.Name,
