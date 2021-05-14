@@ -31,7 +31,7 @@ func includeField(f *gen.Field) bool {
 	return true
 }
 
-func (e *entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
+func (e *Entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
 	var fields ast.FieldList
 	if t.ID != nil && includeField(t.ID) {
 		ft, err := e.fieldType(t.ID, true)
@@ -52,6 +52,10 @@ func (e *entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
 		if err != nil {
 			return nil, fmt.Errorf("field(%s): %w", t.ID.Name, err)
 		}
+		// TODO: remove
+		if e.debug {
+			fmt.Printf("Type(%s) Field(%s) Camel(%s)", t.Name, f.Name, camel(f.Name))
+		}
 		fields = append(fields, &ast.FieldDefinition{
 			Name:       camel(f.Name),
 			Type:       ft,
@@ -61,7 +65,7 @@ func (e *entgqlgen) typeFields(t *gen.Type) (ast.FieldList, error) {
 	return fields, nil
 }
 
-func (e *entgqlgen) fieldDirectives(*gen.Field) ast.DirectiveList {
+func (e *Entgqlgen) fieldDirectives(*gen.Field) ast.DirectiveList {
 	// TODO
 	return nil
 }
@@ -73,7 +77,7 @@ func namedType(name string, nillable bool) *ast.Type {
 	return ast.NamedType(name, nil)
 }
 
-func (e *entgqlgen) fieldType(f *gen.Field, idField bool) (*ast.Type, error) {
+func (e *Entgqlgen) fieldType(f *gen.Field, idField bool) (*ast.Type, error) {
 	// TODO: handle array
 	userDefinedType := e.fieldUserDefinedType(f)
 	if userDefinedType != nil {
@@ -111,7 +115,7 @@ func (e *entgqlgen) fieldType(f *gen.Field, idField bool) (*ast.Type, error) {
 	}
 }
 
-func (e *entgqlgen) fieldUserDefinedType(f *gen.Field) *ast.Type {
+func (e *Entgqlgen) fieldUserDefinedType(f *gen.Field) *ast.Type {
 	ann := entgql.EntgqlAnnotate(f.Annotations)
 	if ann != nil && ann.GqlType != "" {
 		return namedType(ann.GqlType, f.Nillable)

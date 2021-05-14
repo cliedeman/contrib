@@ -21,7 +21,7 @@ import (
 	"strings"
 )
 
-func (e *entgqlgen) scalars() {
+func (e *Entgqlgen) scalars() {
 	for scalar := range e.scalarMappings {
 		switch scalar {
 		case "Int":
@@ -43,7 +43,7 @@ func (e *entgqlgen) scalars() {
 	}
 }
 
-func (e *entgqlgen) builtIns() {
+func (e *Entgqlgen) builtIns() {
 	e.insertDefinitions([]*ast.Definition{
 		{
 			Name:    "Int",
@@ -69,7 +69,7 @@ func (e *entgqlgen) builtIns() {
 	})
 }
 
-func (e *entgqlgen) enums() {
+func (e *Entgqlgen) enums() {
 	enums := make(map[string][]string)
 	for _, t := range e.genTypes {
 		for _, f := range t.Fields {
@@ -121,7 +121,7 @@ func unorderedEqual(first, second []string) bool {
 	return true
 }
 
-func (e *entgqlgen) types() error {
+func (e *Entgqlgen) types() error {
 	for _, t := range e.genTypes {
 		// TODO: make relay config opt in
 		interfaces := []string{"Node"}
@@ -146,12 +146,12 @@ func (e *entgqlgen) types() error {
 	return nil
 }
 
-func (e *entgqlgen) insertDefinitions(defs []*ast.Definition) {
+func (e *Entgqlgen) insertDefinitions(defs []*ast.Definition) {
 	for _, d := range defs {
 		e.schema.Types[d.Name] = d
 	}
 }
 
-func (e *entgqlgen) insertDefinition(d *ast.Definition) {
+func (e *Entgqlgen) insertDefinition(d *ast.Definition) {
 	e.schema.Types[d.Name] = d
 }

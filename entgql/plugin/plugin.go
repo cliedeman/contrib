@@ -31,7 +31,22 @@ var (
 	annotationName = entgql.Annotation{}.Name()
 )
 
-type entgqlgen struct {
+type EntGqlGenOption func(*Entgqlgen)
+
+func WithSchemaHooks(hooks ...SchemaHook) EntGqlGenOption {
+	return func(e *Entgqlgen) {
+		e.hooks = hooks
+	}
+}
+
+func WithDebug() EntGqlGenOption {
+	return func(e *Entgqlgen) {
+		e.debug = true
+	}
+}
+
+type Entgqlgen struct {
+	debug          bool
 	genTypes       []*gen.Type
 	scalarMappings map[string]string
 	schema         *ast.Schema
@@ -41,7 +56,7 @@ type entgqlgen struct {
 // SchemaHook hook to modify schema before printing
 type SchemaHook func(schema *ast.Schema)
 
-func (e *entgqlgen) InjectSourceEarly() *ast.Source {
+func (e *Entgqlgen) InjectSourceEarly() *ast.Source {
 	e.builtIns()
 	e.scalars()
 	e.relayBuiltins()
@@ -53,14 +68,18 @@ func (e *entgqlgen) InjectSourceEarly() *ast.Source {
 	for _, h := range e.hooks {
 		h(e.schema)
 	}
+	input := e.print()
+	if e.debug {
+		fmt.Printf("Generated Graphql:\n%s", input)
+	}
 	return &ast.Source{
-		Name:    "entgqlgen.graphql",
-		Input:   e.print(),
+		Name:    "Entgqlgen.graphql",
+		Input:   input,
 		BuiltIn: false,
 	}
 }
 
-func (e *entgqlgen) print() string {
+func (e *Entgqlgen) print() string {
 	sb := &strings.Builder{}
 	printer := formatter.NewFormatter(sb)
 	printer.FormatSchema(e.schema)
@@ -80,7 +99,7 @@ func getTypes(graph *gen.Graph) []*gen.Type {
 	return types
 }
 
-func New(graph *gen.Graph, hooks []SchemaHook) *entgqlgen {
+func New(graph *gen.Graph, opts []EntGqlGenOption) *Entgqlgen {
 	types := getTypes(graph)
 	// Include default mapping for time
 	scalarMappings := map[string]string{
@@ -95,10 +114,9 @@ func New(graph *gen.Graph, hooks []SchemaHook) *entgqlgen {
 			}
 		}
 	}
-	return &entgqlgen{
+	e := &Entgqlgen{
 		genTypes:       types,
 		scalarMappings: scalarMappings,
-		hooks:          hooks,
 		schema: &ast.Schema{
 			Types:         map[string]*ast.Definition{},
 			Directives:    map[string]*ast.DirectiveDefinition{},
@@ -106,17 +124,21 @@ func New(graph *gen.Graph, hooks []SchemaHook) *entgqlgen {
 			Implements:    map[string][]*ast.Definition{},
 		},
 	}
+	for _, opt := range opts {
+		opt(e)
+	}
+	return e
 }
 
-func (e *entgqlgen) Name() string {
-	return "entgqlgen"
+func (e *Entgqlgen) Name() string {
+	return "Entgqlgen"
 }
 
-func Generate(cfg *config.Config, graph *gen.Graph, hooks ...SchemaHook) error {
+func Generate(cfg *config.Config, graph *gen.Graph, opts ...EntGqlGenOption) error {
 	// We do not use plugin.MutateConfig because it is called too late in the initialization
 	modifyConfig(cfg, graph)
 	return api.Generate(cfg,
-		api.AddPlugin(New(graph, hooks)),
+		api.AddPlugin(New(graph, opts)),
 	)
 }
 
@@ -135,5 +157,5 @@ func modifyConfig(cfg *config.Config, graph *gen.Graph) {
 	}
 }
 
-var _ plugin.EarlySourceInjector = &entgqlgen{}
-var _ plugin.Plugin = &entgqlgen{}
+var _ plugin.EarlySourceInjector = &Entgqlgen{}
+var _ plugin.Plugin = &Entgqlgen{}

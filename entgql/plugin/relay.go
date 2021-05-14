@@ -21,7 +21,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-func (e *entgqlgen) relayBuiltins() {
+func (e *Entgqlgen) relayBuiltins() {
 	e.insertDefinitions([]*ast.Definition{
 		{
 			Name: "Cursor",
@@ -72,7 +72,7 @@ func createRelayConnection(t *gen.Type) bool {
 	return false
 }
 
-func (e *entgqlgen) relayConnection(t *gen.Type) {
+func (e *Entgqlgen) relayConnection(t *gen.Type) {
 	e.insertDefinition(&ast.Definition{
 		Name: fmt.Sprintf("%sEdge", t.Name),
 		Kind: ast.Object,

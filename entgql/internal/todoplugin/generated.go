@@ -437,7 +437,7 @@ type Mutation {
   clearTodos: Int!
 }
 `, BuiltIn: false},
-	{Name: "entgqlgen.graphql", Input: `scalar Cursor
+	{Name: "Entgqlgen.graphql", Input: `scalar Cursor
 interface Node {
 	id: ID!
 }
