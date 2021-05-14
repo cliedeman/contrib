@@ -32,7 +32,7 @@ func TestEmpty(t *testing.T) {
 
 func TestModifyConfig(t *testing.T) {
 	cfg := config.DefaultConfig()
-	modifyConfig(cfg, &gen.Graph{
+	MutateConfig(cfg, &gen.Graph{
 		Config: &gen.Config{
 			Package: "example.com",
 		},
@@ -48,7 +48,7 @@ func TestModifyConfig(t *testing.T) {
 func TestModifyConfig_autoBindPresent(t *testing.T) {
 	cfg := config.DefaultConfig()
 	cfg.AutoBind = append(cfg.AutoBind, "example.com")
-	modifyConfig(cfg, &gen.Graph{
+	MutateConfig(cfg, &gen.Graph{
 		Config: &gen.Config{
 			Package: "example.com",
 		},
@@ -66,7 +66,7 @@ func TestModifyConfig_noderPresent(t *testing.T) {
 	cfg.Models["Node"] = config.TypeMapEntry{
 		Model: []string{"example.com.CustomNoder"},
 	}
-	modifyConfig(cfg, &gen.Graph{
+	MutateConfig(cfg, &gen.Graph{
 		Config: &gen.Config{
 			Package: "example.com",
 		},

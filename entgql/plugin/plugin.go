@@ -99,7 +99,7 @@ func getTypes(graph *gen.Graph) []*gen.Type {
 	return types
 }
 
-func New(graph *gen.Graph, opts []EntGqlGenOption) *Entgqlgen {
+func New(graph *gen.Graph, opts ...EntGqlGenOption) *Entgqlgen {
 	types := getTypes(graph)
 	// Include default mapping for time
 	scalarMappings := map[string]string{
@@ -135,14 +135,14 @@ func (e *Entgqlgen) Name() string {
 }
 
 func Generate(cfg *config.Config, graph *gen.Graph, opts ...EntGqlGenOption) error {
-	// We do not use plugin.MutateConfig because it is called too late in the initialization
-	modifyConfig(cfg, graph)
+	MutateConfig(cfg, graph)
 	return api.Generate(cfg,
-		api.AddPlugin(New(graph, opts)),
+		api.AddPlugin(New(graph, opts...)),
 	)
 }
 
-func modifyConfig(cfg *config.Config, graph *gen.Graph) {
+//MutateConfig We do not use plugin.MutateConfig because it is called too late in the initialization
+func MutateConfig(cfg *config.Config, graph *gen.Graph) {
 	autobindPresent := false
 	for _, ab := range cfg.AutoBind {
 		if ab == graph.Package {
