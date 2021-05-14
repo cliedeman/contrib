@@ -22,6 +22,26 @@ import (
 )
 
 var (
+	// PrivatesColumns holds the columns for the "privates" table.
+	PrivatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "private_children", Type: field.TypeInt, Nullable: true},
+	}
+	// PrivatesTable holds the schema information for the "privates" table.
+	PrivatesTable = &schema.Table{
+		Name:       "privates",
+		Columns:    PrivatesColumns,
+		PrimaryKey: []*schema.Column{PrivatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "privates_privates_children",
+				Columns:    []*schema.Column{PrivatesColumns[2]},
+				RefColumns: []*schema.Column{PrivatesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// TodosColumns holds the columns for the "todos" table.
 	TodosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -47,10 +67,12 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		PrivatesTable,
 		TodosTable,
 	}
 )
 
 func init() {
+	PrivatesTable.ForeignKeys[0].RefTable = PrivatesTable
 	TodosTable.ForeignKeys[0].RefTable = TodosTable
 }

@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/contrib/entgql/internal/todo/ent/private"
 	"entgo.io/contrib/entgql/internal/todo/ent/todo"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -45,7 +46,8 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		todo.Table: todo.ValidColumn,
+		private.Table: private.ValidColumn,
+		todo.Table:    todo.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
