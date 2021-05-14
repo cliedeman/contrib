@@ -23,6 +23,19 @@ import (
 	"entgo.io/contrib/entgql/internal/todo/ent"
 )
 
+// The PrivateFunc type is an adapter to allow the use of ordinary
+// function as Private mutator.
+type PrivateFunc func(context.Context, *ent.PrivateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PrivateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.PrivateMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PrivateMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The TodoFunc type is an adapter to allow the use of ordinary
 // function as Todo mutator.
 type TodoFunc func(context.Context, *ent.TodoMutation) (ent.Value, error)

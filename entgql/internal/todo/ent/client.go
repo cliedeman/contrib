@@ -23,6 +23,7 @@ import (
 
 	"entgo.io/contrib/entgql/internal/todo/ent/migrate"
 
+	"entgo.io/contrib/entgql/internal/todo/ent/private"
 	"entgo.io/contrib/entgql/internal/todo/ent/todo"
 
 	"entgo.io/ent/dialect"
@@ -35,6 +36,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Private is the client for interacting with the Private builders.
+	Private *PrivateClient
 	// Todo is the client for interacting with the Todo builders.
 	Todo *TodoClient
 	// additional fields for node api
@@ -52,6 +55,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Private = NewPrivateClient(c.config)
 	c.Todo = NewTodoClient(c.config)
 }
 
@@ -84,9 +88,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Todo:   NewTodoClient(cfg),
+		ctx:     ctx,
+		config:  cfg,
+		Private: NewPrivateClient(cfg),
+		Todo:    NewTodoClient(cfg),
 	}, nil
 }
 
@@ -104,15 +109,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config: cfg,
-		Todo:   NewTodoClient(cfg),
+		config:  cfg,
+		Private: NewPrivateClient(cfg),
+		Todo:    NewTodoClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Todo.
+//		Private.
 //		Query().
 //		Count(ctx)
 //
@@ -135,7 +141,130 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Private.Use(hooks...)
 	c.Todo.Use(hooks...)
+}
+
+// PrivateClient is a client for the Private schema.
+type PrivateClient struct {
+	config
+}
+
+// NewPrivateClient returns a client for the Private from the given config.
+func NewPrivateClient(c config) *PrivateClient {
+	return &PrivateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `private.Hooks(f(g(h())))`.
+func (c *PrivateClient) Use(hooks ...Hook) {
+	c.hooks.Private = append(c.hooks.Private, hooks...)
+}
+
+// Create returns a create builder for Private.
+func (c *PrivateClient) Create() *PrivateCreate {
+	mutation := newPrivateMutation(c.config, OpCreate)
+	return &PrivateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Private entities.
+func (c *PrivateClient) CreateBulk(builders ...*PrivateCreate) *PrivateCreateBulk {
+	return &PrivateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Private.
+func (c *PrivateClient) Update() *PrivateUpdate {
+	mutation := newPrivateMutation(c.config, OpUpdate)
+	return &PrivateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PrivateClient) UpdateOne(pr *Private) *PrivateUpdateOne {
+	mutation := newPrivateMutation(c.config, OpUpdateOne, withPrivate(pr))
+	return &PrivateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PrivateClient) UpdateOneID(id int) *PrivateUpdateOne {
+	mutation := newPrivateMutation(c.config, OpUpdateOne, withPrivateID(id))
+	return &PrivateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Private.
+func (c *PrivateClient) Delete() *PrivateDelete {
+	mutation := newPrivateMutation(c.config, OpDelete)
+	return &PrivateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *PrivateClient) DeleteOne(pr *Private) *PrivateDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *PrivateClient) DeleteOneID(id int) *PrivateDeleteOne {
+	builder := c.Delete().Where(private.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PrivateDeleteOne{builder}
+}
+
+// Query returns a query builder for Private.
+func (c *PrivateClient) Query() *PrivateQuery {
+	return &PrivateQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Private entity by its id.
+func (c *PrivateClient) Get(ctx context.Context, id int) (*Private, error) {
+	return c.Query().Where(private.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PrivateClient) GetX(ctx context.Context, id int) *Private {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryParent queries the parent edge of a Private.
+func (c *PrivateClient) QueryParent(pr *Private) *PrivateQuery {
+	query := &PrivateQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(private.Table, private.FieldID, id),
+			sqlgraph.To(private.Table, private.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, private.ParentTable, private.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Private.
+func (c *PrivateClient) QueryChildren(pr *Private) *PrivateQuery {
+	query := &PrivateQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(private.Table, private.FieldID, id),
+			sqlgraph.To(private.Table, private.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, private.ChildrenTable, private.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PrivateClient) Hooks() []Hook {
+	return c.hooks.Private
 }
 
 // TodoClient is a client for the Todo schema.
