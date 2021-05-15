@@ -18,13 +18,15 @@ import (
 	"entgo.io/contrib/entgql/plugin"
 	"flag"
 	"fmt"
+	"github.com/99designs/gqlgen/api"
+	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/plugin/modelgen"
+	"github.com/99designs/gqlgen/plugin/resolvergen"
 	"log"
 	"os"
 
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
-
-	"github.com/99designs/gqlgen/codegen/config"
 )
 
 func main() {
@@ -44,7 +46,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, "failed to load config", err.Error())
 		os.Exit(2)
 	}
-	err = plugin.Generate(cfg, graph)
+	err = api.Generate(cfg,
+		api.NoPlugins(),
+		api.AddPlugin(plugin.New(graph)),
+		api.AddPlugin(modelgen.New()),
+		api.AddPlugin(resolvergen.New()))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(3)

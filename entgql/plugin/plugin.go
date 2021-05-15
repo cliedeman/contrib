@@ -18,8 +18,6 @@ import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc/gen"
 	"fmt"
-	"github.com/99designs/gqlgen/api"
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
@@ -51,6 +49,7 @@ type Entgqlgen struct {
 	scalarMappings map[string]string
 	schema         *ast.Schema
 	hooks          []SchemaHook
+	graph          *gen.Graph
 }
 
 // SchemaHook hook to modify schema before printing
@@ -113,6 +112,7 @@ func New(graph *gen.Graph, opts ...EntGqlGenOption) *Entgqlgen {
 		}
 	}
 	e := &Entgqlgen{
+		graph:          graph,
 		genTypes:       types,
 		scalarMappings: scalarMappings,
 		schema: &ast.Schema{
@@ -132,28 +132,6 @@ func (e *Entgqlgen) Name() string {
 	return "Entgqlgen"
 }
 
-func Generate(cfg *config.Config, graph *gen.Graph, opts ...EntGqlGenOption) error {
-	MutateConfig(cfg, graph)
-	return api.Generate(cfg,
-		api.AddPlugin(New(graph, opts...)),
-	)
-}
-
-// MutateConfig We do not use plugin.MutateConfig because it is called too late during gqlgen initialization
-func MutateConfig(cfg *config.Config, graph *gen.Graph) {
-	autobindPresent := false
-	for _, ab := range cfg.AutoBind {
-		if ab == graph.Package {
-			autobindPresent = true
-		}
-	}
-	if !autobindPresent {
-		cfg.AutoBind = append(cfg.AutoBind, graph.Package)
-	}
-	if !cfg.Models.Exists("Node") {
-		cfg.Models.Add("Node", fmt.Sprintf("%s.Noder", graph.Package))
-	}
-}
-
-var _ plugin.EarlySourceInjector = &Entgqlgen{}
 var _ plugin.Plugin = &Entgqlgen{}
+var _ plugin.EarlySourceInjector = &Entgqlgen{}
+var _ plugin.ConfigMutator = &Entgqlgen{}

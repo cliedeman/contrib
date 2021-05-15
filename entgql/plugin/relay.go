@@ -21,15 +21,21 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
+var (
+	RelayCursor   = "Cursor"
+	RelayNode     = "Node"
+	RelayPageInfo = "PageInfo"
+)
+
 func (e *Entgqlgen) relayBuiltins() {
 	e.insertDefinitions([]*ast.Definition{
 		{
-			Name: "Cursor",
+			Name: RelayCursor,
 			Kind: ast.Scalar,
 		},
 		{
 			Kind: ast.Interface,
-			Name: "Node",
+			Name: RelayNode,
 			Fields: []*ast.FieldDefinition{
 				{
 					Name: "id",
@@ -38,7 +44,7 @@ func (e *Entgqlgen) relayBuiltins() {
 			},
 		},
 		{
-			Name: "PageInfo",
+			Name: RelayPageInfo,
 			Kind: ast.Object,
 			Fields: []*ast.FieldDefinition{
 				{

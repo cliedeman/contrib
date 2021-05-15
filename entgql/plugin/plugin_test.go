@@ -18,7 +18,6 @@ import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -28,55 +27,6 @@ func TestEmpty(t *testing.T) {
 		Config: &gen.Config{},
 	})
 	require.Equal(t, ``, e.print())
-}
-
-func TestModifyConfig(t *testing.T) {
-	cfg := config.DefaultConfig()
-	MutateConfig(cfg, &gen.Graph{
-		Config: &gen.Config{
-			Package: "example.com",
-		},
-	})
-	expected := config.DefaultConfig()
-	expected.AutoBind = append(expected.AutoBind, "example.com")
-	expected.Models["Node"] = config.TypeMapEntry{
-		Model: []string{"example.com.Noder"},
-	}
-	require.Equal(t, expected, cfg)
-}
-
-func TestModifyConfig_autoBindPresent(t *testing.T) {
-	cfg := config.DefaultConfig()
-	cfg.AutoBind = append(cfg.AutoBind, "example.com")
-	MutateConfig(cfg, &gen.Graph{
-		Config: &gen.Config{
-			Package: "example.com",
-		},
-	})
-	expected := config.DefaultConfig()
-	expected.AutoBind = append(expected.AutoBind, "example.com")
-	expected.Models["Node"] = config.TypeMapEntry{
-		Model: []string{"example.com.Noder"},
-	}
-	require.Equal(t, expected, cfg)
-}
-
-func TestModifyConfig_noderPresent(t *testing.T) {
-	cfg := config.DefaultConfig()
-	cfg.Models["Node"] = config.TypeMapEntry{
-		Model: []string{"example.com.CustomNoder"},
-	}
-	MutateConfig(cfg, &gen.Graph{
-		Config: &gen.Config{
-			Package: "example.com",
-		},
-	})
-	expected := config.DefaultConfig()
-	expected.AutoBind = append(expected.AutoBind, "example.com")
-	expected.Models["Node"] = config.TypeMapEntry{
-		Model: []string{"example.com.CustomNoder"},
-	}
-	require.Equal(t, expected, cfg)
 }
 
 func TestGetTypes(t *testing.T) {
