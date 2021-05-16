@@ -9,24 +9,6 @@ input TodoInput {
   text: String!
   parent: ID
 }
-
-enum OrderDirection {
-  ASC
-  DESC
-}
-
-enum TodoOrderField {
-  CREATED_AT
-  PRIORITY
-  STATUS
-  TEXT
-}
-
-input TodoOrder {
-  direction: OrderDirection!
-  field: TodoOrderField
-}
-
 type Query {
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!

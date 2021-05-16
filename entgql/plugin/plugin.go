@@ -58,6 +58,8 @@ type SchemaHook func(schema *ast.Schema)
 func (e *Entgqlgen) InjectSourceEarly() *ast.Source {
 	e.scalars()
 	e.relayBuiltins()
+	e.entBuiltins()
+	e.entOrderBy()
 	e.enums()
 	err := e.types()
 	if err != nil {

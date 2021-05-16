@@ -56,6 +56,10 @@ func TestInjectSourceEarlyEmpty(t *testing.T) {
 interface Node {
 	id: ID!
 }
+enum OrderDirection {
+	ASC
+	DESC
+}
 type PageInfo {
 	hasNextPage: Boolean!
 	hasPreviousPage: Boolean!
@@ -84,6 +88,10 @@ func TestInjectSourceEarly(t *testing.T) {
 var expected = `scalar Cursor
 interface Node {
 	id: ID!
+}
+enum OrderDirection {
+	ASC
+	DESC
 }
 type PageInfo {
 	hasNextPage: Boolean!
@@ -116,6 +124,16 @@ type TodoConnection {
 type TodoEdge {
 	node: Todo
 	cursor: Cursor
+}
+input TodoOrder {
+	direction: OrderDirection!
+	field: TodoOrderField!
+}
+enum TodoOrderField {
+	CREATED_AT
+	STATUS
+	PRIORITY
+	TEXT
 }
 type User implements Node {
 	id: ID!

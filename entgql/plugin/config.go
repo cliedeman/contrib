@@ -38,7 +38,6 @@ func (e *Entgqlgen) MutateConfig(cfg *config.Config) error {
 	// Insert types
 	for _, obj := range e.genTypes {
 		ann := entgql.EntgqlAnnotate(obj.Annotations)
-
 		if ann == nil || !ann.Skip {
 			if !cfg.Models.Exists(obj.Name) {
 				cfg.Models.Add(obj.Name, e.entGoType(obj.Name))
@@ -52,8 +51,8 @@ func (e *Entgqlgen) MutateConfig(cfg *config.Config) error {
 				if !cfg.Models.Exists(edge) {
 					cfg.Models.Add(edge, e.entGoType(edge))
 				}
-				order := fmt.Sprintf("%sOrder", obj.Name)
 				if hasOrderBy(obj) {
+					order := fmt.Sprintf("%sOrder", obj.Name)
 					cfg.Models[order] = config.TypeMapEntry{Model: []string{fmt.Sprintf("%s.%s", e.graph.Package, order)}}
 					cfg.Models[order+"Field"] = config.TypeMapEntry{Model: []string{fmt.Sprintf("%s.%s", e.graph.Package, order+"Field")}}
 				}
