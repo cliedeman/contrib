@@ -35,32 +35,6 @@ func (e *Entgqlgen) scalars() {
 	}
 }
 
-func (e *Entgqlgen) builtIns() {
-	e.insertDefinitions([]*ast.Definition{
-		{
-			Name:    "Int",
-			Kind:    ast.Scalar,
-			BuiltIn: true,
-		}, {
-			Name:    "String",
-			Kind:    ast.Scalar,
-			BuiltIn: true,
-		}, {
-			Name:    "Float",
-			Kind:    ast.Scalar,
-			BuiltIn: true,
-		}, {
-			Name:    "Boolean",
-			Kind:    ast.Scalar,
-			BuiltIn: true,
-		}, {
-			Name:    "ID",
-			Kind:    ast.Scalar,
-			BuiltIn: true,
-		},
-	})
-}
-
 func (e *Entgqlgen) enums() {
 	enums := make(map[string][]string)
 	for _, t := range e.genTypes {

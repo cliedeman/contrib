@@ -56,7 +56,6 @@ type Entgqlgen struct {
 type SchemaHook func(schema *ast.Schema)
 
 func (e *Entgqlgen) InjectSourceEarly() *ast.Source {
-	e.builtIns()
 	e.scalars()
 	e.relayBuiltins()
 	e.enums()

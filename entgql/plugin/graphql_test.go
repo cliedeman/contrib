@@ -60,14 +60,6 @@ func TestEnums(t *testing.T) {
 }
 */
 
-func TestBuiltins(t *testing.T) {
-	e := New(&gen.Graph{
-		Config: &gen.Config{},
-	})
-	e.builtIns()
-	require.Equal(t, ``, e.print())
-}
-
 func TestScalars(t *testing.T) {
 	e := New(&gen.Graph{
 		Config: &gen.Config{},
