@@ -73,7 +73,7 @@ func (e *Entgqlgen) InjectSourceEarly() *ast.Source {
 		fmt.Printf("Generated Graphql:\n%s", input)
 	}
 	return &ast.Source{
-		Name:    "entgqlgen.graphql",
+		Name:    "entgql.graphql",
 		Input:   input,
 		BuiltIn: false,
 	}
@@ -130,7 +130,7 @@ func New(graph *gen.Graph, opts ...EntGqlGenOption) *Entgqlgen {
 }
 
 func (e *Entgqlgen) Name() string {
-	return "Entgqlgen"
+	return "entgql"
 }
 
 var _ plugin.Plugin = &Entgqlgen{}
