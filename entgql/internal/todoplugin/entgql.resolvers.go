@@ -19,17 +19,16 @@ package todo
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/contrib/entgql/internal/todoplugin/ent"
 )
 
 func (r *userResolver) Age(ctx context.Context, obj *ent.User) (float64, error) {
-	panic(fmt.Errorf("not implemented"))
+	return float64(obj.Age), nil
 }
 
 func (r *userResolver) Amount(ctx context.Context, obj *ent.User) (float64, error) {
-	panic(fmt.Errorf("not implemented"))
+	return float64(obj.Amount), nil
 }
 
 // User returns UserResolver implementation.
