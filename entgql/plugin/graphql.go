@@ -47,8 +47,7 @@ func (e *Entgqlgen) enums() {
 				}
 				if values, ok := enums[enumName]; ok {
 					if !unorderedEqual(values, f.EnumValues()) {
-						// TODO: error
-						panic("enums are not equal")
+						panic(fmt.Errorf("enums are not equal. Name: %s, Values1: %s, Values: %s", enumName, values, f.EnumValues()))
 					}
 				} else {
 					enums[enumName] = f.EnumValues()
